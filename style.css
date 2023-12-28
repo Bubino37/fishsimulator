@@ -1,3 +1,27 @@
+/* Základné štýlovanie */
+body, html {
+    height: 100%;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #eef;
+  }
+  
+  #gameArea {
+    width: 90%;
+    height: 80%;
+    border: 2px solid #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  #castButton {
+    padding: 10px 20px;
+    font-size: 1.5em;
+  }
+  
 canvas {
     border: 1px solid black;
     display: block;
