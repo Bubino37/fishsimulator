@@ -1,0 +1,9 @@
+{
+    "money": 1000,
+    "inventory": [
+      {"species": "Carp", "value": 200},
+      {"species": "Trout", "value": 150}
+    ],
+    "level": 1,
+    "equipment": 1
+  }
