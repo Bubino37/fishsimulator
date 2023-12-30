@@ -23,9 +23,47 @@ async function updatePlayerData(newData) {
       },
       body: JSON.stringify(newData),
     });
+    displayPlayerData(getPlayerData());
     return response.json();
   } catch (error) {
     console.error("Chyba pri aktualizácii hráčových dát:", error);
+  }
+}
+
+// Zobrazenie hráčových údajov
+function displayPlayerData(data) {
+  document.getElementById('playerData').innerHTML = '';
+  document.getElementById('playerInventory').innerHTML = '';
+
+  for (const key in data) {
+    if (Array.isArray(data[key])) {
+      const container = document.getElementById('playerInventory');
+
+      data[key].forEach(item => {
+        const keyItem = document.createElement('div');
+        keyItem.classList.add('item');
+        keyItem.textContent = `${item.species}: `;
+        container.appendChild(keyItem);
+
+        const valueItem = document.createElement('div');
+        valueItem.classList.add('item');
+        valueItem.textContent = `${item.value}`;
+        container.appendChild(valueItem);
+      });
+
+    } else {
+      const container = document.getElementById('playerData');
+
+      const keyItem = document.createElement('div');
+      keyItem.classList.add('item');
+      keyItem.textContent = `${key}: `;
+      container.appendChild(keyItem);
+
+      const valueItem = document.createElement('div');
+      valueItem.classList.add('item');
+      valueItem.textContent = `${data[key]}`;
+      container.appendChild(valueItem);
+    }
   }
 }
 
@@ -112,6 +150,7 @@ async function initGame() {
     }
     console.log(playerData);
     console.log(levelsData); // Zobraziť údaje o úrovni
+    displayPlayerData(playerData);
     const castButton = document.getElementById("castButton");
     if (castButton) {
       castButton.addEventListener('click', castLine); // Pridáva udalosť pre kliknutie
