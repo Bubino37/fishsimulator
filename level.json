@@ -16,20 +16,20 @@
       "cena": 30
     },
     {
-      "level": 3,
-      "requiredExperience": 600,
-      "info": "rieka",
-      "image": "img/rieka.png",
-      "ryba-druh": "losos",
-      "cena": 50
-    },
-    {
-      "level": 4,
-      "requiredExperience": 1000,
-      "info": "more",
-      "image": "img/more.png",
-      "ryba-druh": "zralok",
-      "cena": 100
+        "level": 3,
+        "requiredExperience": 600,
+        "info": "rieka",
+        "image": "img/rieka.png",
+        "ryba-druh": "losos",
+        "cena": 50
+      },
+      {
+        "level": 4,
+        "requiredExperience": 1000,
+        "info": "more",
+        "image": "img/more.png",
+        "ryba-druh": "zralok",
+        "cena": 100
     },
     {
       "level": 5,
@@ -38,12 +38,13 @@
       "image": "img/ocean.png",
       "ryba-druh": "velryba",
       "cena": 120
-    },
-    {
-      "level": 6,
-      "requiredExperience": 3000,
-      "info": "final",
-      "image": "img/ocean.png"
-    }
+  },{
+    "level": 6,
+    "requiredExperience": 3000,
+    "info": "final",
+    "image": "img/ocean.png"
+}
 
-]
+    
+  ]
+  
