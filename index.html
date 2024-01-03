@@ -17,24 +17,38 @@
     <!-- <canvas id="gameCanvas" width="600" height="400"></canvas> -->
     <div id="menu">
         <button class="waves-effect waves-light btn-large">Hraj</button>
-<!--        <button class="waves-effect waves-light btn-large">Nastavenia</button>-->
+        <!-- <button class="waves-effect waves-light btn-large">Nastavenia</button> -->
         <button class="waves-effect waves-light btn-large" onclick="showGameControlsModal()">Ako hrať?</button>
-        <button class="waves-effect waves-light btn-large" onclick="resetPlayerData()">Resetovanie hry</button>
+        <!-- <button class="waves-effect waves-light btn-large" onclick="resetPlayerData()">Resetovanie hry</button> -->
+    </div>
+    <div id="shopModal" style="display:none;">
+        <div>
+            <h2>Obchod</h2>
+            <ul id="shopItems">
+                <!-- Úrovne a tlačidlá na nákup budú pridané dynamicky tu -->
+            </ul>
+            <button onclick="toggleShop()">Zatvoriť Obchod</button>
+        </div>
     </div>
     <div id="gameControlsModal">
         <button id="closeGameControlsModal" onclick="hideGameControlsModal()"></button>
         <p>tu treba vysvetlit ako funguje hra</p>
     </div>
-
     <div id="playerDataSideBar">
         <div class="container" id="playerData"></div>
         <br>
+        <h4>Inventory</h4>
         <div class="container" id="playerInventory"></div>
     </div>
     <div id="gameArea">
         <!-- <button id="castButton">Udica!</button> -->
         <button id="castButton" class="btn-floating btn-large waves-effect waves-light red"><i
                 class="material-icons">send</i></button>
+        <button id="menuButton" class="btn-floating btn-large waves-effect waves-light red" onclick="toggleMenu()"><i
+                class="material-icons">menu</i></button>
+        <button id="shopButton" class="btn-floating btn-large waves-effect waves-light red" onclick="toggleShop()"><i
+                class="material-icons">shopping_cart</i></button>
+
         <!-- Tu môže byť grafika alebo animácia hodenia udice -->
 
     </div>

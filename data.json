@@ -1,6 +1,6 @@
 {
   "level": 1,
-    "money": 1000,
+    "money": 10000000,
     "equipment": 1,
     "inventory": [
       {"species": "Carp", "value": 200},

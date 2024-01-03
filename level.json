@@ -38,7 +38,8 @@
       "image": "img/ocean.png",
       "ryba-druh": "velryba",
       "cena": 120
-  },{
+  }
+  ,{
     "level": 6,
     "requiredExperience": 3000,
     "info": "final",

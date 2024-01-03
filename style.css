@@ -27,6 +27,25 @@ html {
   font-size: 1.5em;
 }
 
+#menuButton {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+#shopButton {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+}
+#shopModal {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  padding: 20px;
+  z-index: 1000; /* Higher than the game elements */
+}
 #menu {
   display: none;
   /* Skryjeme menu na začiatku */
