@@ -45,6 +45,33 @@ html {
   align-items: center;
 }
 
+.btn-large {
+  width: 15rem;
+  margin-bottom: 0.2rem;
+}
+
+#gameControlsModal {
+  display: none;
+  position: fixed;
+  width: 50%;
+  height: 80%;
+  background-color: rgba(255, 255, 255);
+  z-index: 1001;
+  justify-content: center;
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+}
+
+#closeGameControlsModal {
+  height: 1rem;
+  width: 1rem;
+  background: red;
+}
+
+#playerDataSideBar {
+  width: 10rem;
+}
+
 canvas {
   border: 1px solid black;
   display: block;

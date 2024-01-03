@@ -44,6 +44,21 @@ function showMenu() {
 function hideMenu() {
   document.getElementById('menu').style.display = 'none';
 }
+
+function showGameControlsModal() {
+  document.getElementById('gameControlsModal').style.display = 'block';
+}
+
+function hideGameControlsModal() {
+  document.getElementById('gameControlsModal').style.display = 'none';
+}
+
+window.onclick = function(event) {
+  if (event.target === document.getElementById('gameControlsModal')) {
+    hideGameControlsModal();
+  }
+};
+
 async function catchFish() {
   clearTimeout(fishCatchTimer); // Stop the timer as fish is caught
   const currentLevel = playerData.level; // Or other way to get the player's level
@@ -122,6 +137,7 @@ async function resetPlayerData() {
   };
   await updatePlayerData(defaultData);
 }
+
 // Načítanie údajov o úrovni
 async function loadLevelsData() {
   try {
@@ -142,12 +158,14 @@ function prepareToCatchFish() {
   catchTime = Math.floor(Math.random() * (30000 - 10000 + 1) + 10000);
   setTimeout(showCatchButton, catchTime);
 }
+
 function setLevelBackground(levelData) {
     const gameArea = document.getElementById("gameArea");
     if(gameArea && levelData.image) {
       gameArea.style.backgroundImage = `url('./${levelData.image}')`;
     }
   }
+
 // Klávesový vstup pre počítače
 document.addEventListener('keydown', (event) => {
   if ((event.key === "w" || event.key === "W") && isCastingEnabled) {
@@ -160,6 +178,7 @@ document.addEventListener('keyup', (event) => {
     clearTimeout(keyDownTimer); // Cancel the countdown if key is released early
   }
 });
+
 // Gyroskop pre mobily
 window.addEventListener('deviceorientation', (event) => {
   let beta = event.beta; // Beta je rotácia okolo osi X, ktorá meria náklon hore a dole.
@@ -169,12 +188,14 @@ window.addEventListener('deviceorientation', (event) => {
     isCastingEnabled = false; // Zastaviť detekciu naklonenia kým sa neklikne na tlačidlo
   }
 });
+
 function showCastButton() {
   const castButton = document.getElementById("castButton");
   if (castButton) {
     castButton.style.display = "block"; // Zobrazí tlačidlo
   }
 }
+
 function showCatchButton() {
   const castButton = document.getElementById("castButton");
   if (castButton) {
@@ -189,6 +210,7 @@ function showCatchButton() {
       }, 3000);
   }
 }
+
 function castLine() {
   const castButton = document.getElementById("castButton");
   if (castButton) {
@@ -237,6 +259,7 @@ document.addEventListener('DOMContentLoaded', function() {
     castButton.style.display = "none"; // Hides the button at the start
   }
 });
+
 async function initGame() {
   await loadLevelsData();
   await loadPlayerData(); // This function will load data and store it in playerData

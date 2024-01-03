@@ -17,14 +17,18 @@
     <!-- <canvas id="gameCanvas" width="600" height="400"></canvas> -->
     <div id="menu">
         <button class="waves-effect waves-light btn-large">Hraj</button>
-        <button class="waves-effect waves-light btn-large">Nastavenia</button>
-        <button class="waves-effect waves-light btn-large">Informácie o hre</button>
+<!--        <button class="waves-effect waves-light btn-large">Nastavenia</button>-->
+        <button class="waves-effect waves-light btn-large" onclick="showGameControlsModal()">Ako hrať?</button>
         <button class="waves-effect waves-light btn-large" onclick="resetPlayerData()">Resetovanie hry</button>
     </div>
+    <div id="gameControlsModal">
+        <button id="closeGameControlsModal" onclick="hideGameControlsModal()"></button>
+        <p>tu treba vysvetlit ako funguje hra</p>
+    </div>
+
     <div id="playerDataSideBar">
         <div class="container" id="playerData"></div>
         <br>
-        <h4>Inventory</h4>
         <div class="container" id="playerInventory"></div>
     </div>
     <div id="gameArea">
