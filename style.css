@@ -10,13 +10,18 @@ html {
 }
 
 #gameArea {
-  width: 1024px;
-  height: 1024px;
-  border: 2px solid #333;
+  max-width: 1024px;
+  max-height: 1024px;
+  width: 90vw; /* Šírka je 90% z šírky viewportu */
+  height: 90vw; /* Výška je 90% z šírky viewportu */
+  aspect-ratio: 1 / 1; /* Udržuje štvorcový pomer strán */
+  box-sizing: border-box; /* Uistite sa, že hranice a padding sú zahrnuté v šírke/výške */
   display: flex;
   justify-content: center;
   align-items: center;
   position: relative;
+  background-size: cover; /* Uistite sa, že pozadie sa zobrazuje celé bez roztiahnutia */
+  background-repeat: no-repeat; /* Neopakovanie pozadia */
 }
 
 #castButton {
@@ -164,7 +169,6 @@ canvas {
   display: block;
   margin: auto;
 }
-
 .fishing-marker {
   width: 20px;
   height: 20px;
@@ -200,4 +204,45 @@ canvas {
   width: 80%; /* Šířka progress baru */
   height: 20px; /* Výška progress baru */
   margin: 0 auto; /* Centrování v rámci kontejneru */
+}
+
+.btn-throw {
+  position: absolute;
+  right: 10px;  /* Alebo akýkoľvek iný odstup */
+  bottom: 10px; /* Alebo akýkoľvek iný odstup */
+  /* ... ďalšie štýly ... */
+}
+@media screen and (min-width: 600px) {
+  #throwButton {
+      display: none; /* Skryje tlačidlo na desktopových zariadeniach */
+  }
+}
+
+/* Štýly pre mobilné zariadenia */
+@media screen and (max-width: 599px) {
+  .btn-throw {
+      position: absolute;
+      right: 10px;
+      bottom: 10px;
+      /* ... rovnaké štýly ako má castButton ... */
+  }
+}
+
+@media (max-width: 1024px) {
+  #gameArea {
+    width: 90vw; /* Alebo iný percentuálny podiel, prípadne vhodnú veľkosť */
+    height: 90vw; /* Udržuje štvorcový pomer strán */
+  }
+}
+@media screen and (min-width: 1025px) {
+  #throwButton {
+    display: none;
+  }
+}
+
+@media (min-width: 1025px) {
+  #gameArea {
+    width: 1024px; /* Pevná šírka 1024px */
+    height: 1024px; /* Pevná výška 1024px */
+  }
 }
