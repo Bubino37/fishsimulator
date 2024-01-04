@@ -23,7 +23,11 @@ html {
   position: absolute;
   bottom: 20px;
   right: 20px;
-  padding: 10px 20px;
+  /* padding: 20px 30px; */
+  width: 80px;
+  height: 80px;
+  text-align: center;
+  vertical-align: middle;
   font-size: 1.5em;
 }
 
@@ -95,4 +99,40 @@ canvas {
   border: 1px solid black;
   display: block;
   margin: auto;
+}
+.fishing-alert {
+  width: 20px;
+  height: 20px;
+  background-color: red;
+  border-radius: 50%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: none;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1.5);
+    opacity: 0;
+  }
+}
+
+#holdProgressContainer {
+  text-align: center; /* Centrování progress baru */
+}
+
+#holdProgress {
+  width: 80%; /* Šířka progress baru */
+  height: 20px; /* Výška progress baru */
+  margin: 0 auto; /* Centrování v rámci kontejneru */
 }
