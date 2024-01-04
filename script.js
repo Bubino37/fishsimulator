@@ -25,13 +25,15 @@ async function loadPlayerData() {
   if (!playerData.purchasedLevels) {
       playerData.purchasedLevels = []; // Initialize if not present
   }
-  displayPlayerData(playerData);
+  // displayPlayerData(playerData);
 }
 // Aktualizácia hráčových údajov
 async function updatePlayerData(newData) {
   playerData = newData; // Updates data in the playerData variable
   // console.log(playerData);
-  displayPlayerData(playerData); // Displays updated data
+  document.getElementById('levelInfo').textContent = playerData.level;
+    document.getElementById('moneyInfo').textContent = playerData.money;
+  // displayPlayerData(playerData); // Displays updated data
 }
 
 function showMenu() {
@@ -79,6 +81,10 @@ async function catchFish() {
       isCastingEnabled = true;
       await updatePlayerData(playerData);
   }
+}
+
+function updateStatusInfo(statusText) {
+  document.getElementById('statusInfo').textContent = statusText;
 }
 
 // Zobrazenie hráčových údajov
@@ -143,6 +149,7 @@ async function loadLevelsData() {
 function prepareToCatchFish() {
   if (isCastingEnabled) {
     console.log("Udica sa hodila!");
+    updateStatusInfo("Udica sa hodila!");
     isCastingEnabled = false;
 
     // Show the fishing alert
@@ -221,28 +228,25 @@ function showCastButton() {
   }
 }
 function populateShop() {
-  const shopItems = document.getElementById('shopItems');
-  shopItems.innerHTML = ''; // Clear existing items
+  const shopTable = document.getElementById('shopTable').getElementsByTagName('tbody')[0];
+  shopTable.innerHTML = ''; // Clear existing items
 
   levelsData.forEach(level => {
-      let li = document.createElement('li');
-      li.textContent = `${level.info.charAt(0).toUpperCase() + level.info.slice(1)} - Cena: ${level.requiredExperience} skúsenostných bodov`;
+    let row = shopTable.insertRow();
+    let levelCell = row.insertCell(0);
+    let priceCell = row.insertCell(1);
+    let actionCell = row.insertCell(2);
 
-      let actionButton = document.createElement('button');
-      if (playerData.purchasedLevels.includes(level.level)) {
-          if(playerData.level === level.level){
-              actionButton.textContent = 'Aktuálny';
-              actionButton.disabled = true;
-          } else {
-              actionButton.textContent = 'Prepnúť';
-              actionButton.onclick = function() { switchLevel(level); };
-          }
-      } else {
-          actionButton.textContent = 'Kúpiť';
-          actionButton.onclick = function() { buyLevel(level); };
-      }
-      li.appendChild(actionButton);
-      shopItems.appendChild(li);
+    levelCell.textContent = level.info;
+    priceCell.textContent = level.requiredExperience + " $";
+
+    let actionButton = document.createElement('button');
+    actionButton.textContent = playerData.purchasedLevels.includes(level.level) ? 'Prepnúť' : 'Kúpiť';
+    actionButton.disabled = playerData.level === level.level;
+    actionButton.onclick = playerData.purchasedLevels.includes(level.level) ? 
+                            () => switchLevel(level) : 
+                            () => buyLevel(level);
+    actionCell.appendChild(actionButton);
   });
 }
 function buyLevel(level) {
@@ -256,7 +260,9 @@ function buyLevel(level) {
       updatePlayerData(playerData); // Update display and data
 
       populateShop(); // Refresh the shop display
-      console.log(`${level.info} zakúpený!`);
+      console.log(`Level ${level.info} zakúpený!`);
+      updateStatusInfo(`Level ${level.info} zakúpený!`);
+      toggleShop();
   } else {
       console.log("Nedostatočné finančné prostriedky alebo úroveň už bola zakúpená!");
   }
@@ -267,18 +273,23 @@ function switchLevel(level) {
       playerData.level = level.level; // Switch to the new level
       setLevelBackground(level); // Update background
       updatePlayerData(playerData); // Update display and data
-      console.log(`Prepnuté na ${level.info}.`);
+      console.log(`Prepnuté na level ${level.info}.`);
+      updateStatusInfo(`Prepnuté na level ${level.info}.`);
+      toggleShop();
   } else {
       console.log("Úroveň ešte nebola zakúpená!");
+      updateStatusInfo("Úroveň ešte nebola zakúpená!");
   }
 }
 
 function toggleShop() {
   let shopModal = document.getElementById('shopModal');
   if(shopModal.style.display === 'none') {
+      pauseGame(); // Pause the game when the shop is opened
       shopModal.style.display = 'block';
       populateShop(); // Populate the shop with items when opened
   } else {
+      resumeGame(); // Resume the game when the shop is closed
       shopModal.style.display = 'none';
   }
 }
@@ -291,6 +302,47 @@ function toggleMenu() {
       showMenu();
   }
 }
+
+function toggleInventory() {
+  let inventoryModal = document.getElementById('inventoryModal');
+  if(inventoryModal.style.display === 'none') {
+      pauseGame(); // Pause the game when the inventory is opened
+      populateInventory();
+      inventoryModal.style.display = 'block';
+  } else {
+      resumeGame(); // Resume the game when the inventory is closed
+      inventoryModal.style.display = 'none';
+  }
+}
+
+function populateInventory() {
+  const inventoryTable = document.getElementById('inventoryTable').getElementsByTagName('tbody')[0];
+  inventoryTable.innerHTML = ''; // Clear existing items
+
+  playerData.inventory.forEach((item, index) => {
+    let row = inventoryTable.insertRow();
+    let nameCell = row.insertCell(0);
+    let valueCell = row.insertCell(1);
+    let actionCell = row.insertCell(2);
+
+    nameCell.textContent = item.species;
+    valueCell.textContent = item.value + " $";
+
+    let sellButton = document.createElement('button');
+    sellButton.textContent = 'Predať';
+    sellButton.onclick = () => sellItem(index);
+    actionCell.appendChild(sellButton);
+  });
+}
+
+function sellItem(index) {
+  let item = playerData.inventory[index];
+  playerData.money += item.value; // Přidat cenu položky k penězům
+  playerData.inventory.splice(index, 1); // Odebrat položku z inventáře
+  updatePlayerData(playerData); // Aktualizovat data a UI
+  populateInventory(); // Obnovit zobrazení inventáře
+}
+
 function showCatchButton() {
   if (!isGamePaused) {
     const castButton = document.getElementById("castButton");
@@ -304,6 +356,7 @@ function showCatchButton() {
         if (!isGamePaused) {
           castButton.style.display = "none";
           console.log("Ryba ušla!");
+          updateStatusInfo("Ryba ušla!");
           isCastingEnabled = true;
 
           // Reset the timer and alert states
@@ -331,6 +384,7 @@ function castLine() {
 
 function pauseGame() {
   console.log("Hra je zastavena.");
+  updateStatusInfo("Hra je zastavena.");
   if (fishCatchTimer) {
       clearTimeout(fishCatchTimer); // Clears the existing fish catch timer
       // Calculate remaining time for catch if the timer was running
@@ -342,6 +396,7 @@ function pauseGame() {
 }
 function resumeGame() {
   console.log("Hra pokracuje.");
+  updateStatusInfo("Hra pokracuje.");
     if (remainingCatchTime && remainingCatchTime > 0) {
         fishCatchTimer = setTimeout(showCatchButton, remainingCatchTime);
         timerStart = new Date().getTime(); // Reset the start time for the timer
@@ -369,6 +424,7 @@ async function startGame() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+  
   const playButton = document.querySelector("#menu button:nth-child(1)"); // Assuming the first button is 'Play'
   playButton.addEventListener('click', startGame);
 
@@ -381,6 +437,7 @@ document.addEventListener('DOMContentLoaded', function() {
 async function initGame() {
   await loadLevelsData();
   await loadPlayerData(); // This function will load data and store it in playerData
+  updatePlayerData(playerData);
   showMenu(); // Shows menu at the start
     const levelInfo = levelsData.find(level => level.level === playerData.level);
     if(levelInfo) {
@@ -388,7 +445,7 @@ async function initGame() {
     }
     console.log(playerData);
     console.log(levelsData); // Zobraziť údaje o úrovni
-    displayPlayerData(playerData);
+    // displayPlayerData(playerData);
     const castButton = document.getElementById("castButton");
     if (castButton) {
       castButton.addEventListener('click', castLine); // Pridáva udalosť pre kliknutie

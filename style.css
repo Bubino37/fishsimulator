@@ -41,15 +41,79 @@ html {
   top: 10px;
   left: 10px;
 }
-#shopModal {
-  position: fixed;
+.info-panel {
+  position: absolute;
+  top: 10px;
   left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(255,255,255,0.9);
+  padding: 10px;
+  border-radius: 5px;
+  text-align: center;
+  z-index: 10; /* Ensure it's above other items */
+}
+#inventoryButton {
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+  z-index: 10; /* Ensure it's above other items */
+}
+#inventoryModal, #shopModal {
+  position: absolute;
+  width: 80%;
+  left: 10%;
   top: 50%;
-  transform: translate(-50%, -50%);
+  transform: translateY(-50%);
   background: white;
   padding: 20px;
-  z-index: 1000; /* Higher than the game elements */
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.5);
+  z-index: 1000; /* Ensure it's above other items */
 }
+.modal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: 50%;  /* Center vertically */
+  left: 50%; /* Center horizontally */
+  transform: translate(-50%, -50%); /* Adjust position to center */
+  width: 80%; /* Or any desired width */
+  max-width: 500px; /* Maximum width */
+  background: white; /* Background color */
+  padding: 20px;
+  border-radius: 10px; /* Rounded corners */
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2); /* Optional: Shadow for modal */
+  z-index: 1000; /* Ensure it's above other elements */
+}
+
+table {
+  width: 100%; /* Šířka tabulky */
+  border-collapse: collapse; /* Odebrat dvojité okraje */
+}
+
+/* Styly pro hlavičky tabulky */
+th {
+  background-color: #f2f2f2; /* Barva pozadí pro hlavičky */
+  padding: 8px; /* Odsazení okolo textu */
+  text-align: center; /* Vycentrování textu */
+  font-weight: bold; /* Tučné písmo */
+}
+
+/* Styly pro buňky tabulky */
+td {
+  padding: 8px; /* Odsazení okolo textu */
+  text-align: center; /* Vycentrování textu */
+  vertical-align: middle; /* Vertikální vycentrování */
+  border: 1px solid #ddd; /* Okraje buněk */
+}
+
+/* Volitelné: Styly pro řádky tabulky při najetí kurzoru */
+tr:hover {
+  background-color: #f5f5f5;
+}
+
 #menu {
   display: none;
   /* Skryjeme menu na začiatku */

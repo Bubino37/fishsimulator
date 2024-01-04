@@ -31,25 +31,53 @@
         <button class="waves-effect waves-light btn-large" onclick="showGameControlsModal()">Ako hrať?</button>
         <!-- <button class="waves-effect waves-light btn-large" onclick="resetPlayerData()">Resetovanie hry</button> -->
     </div>
-    <div id="shopModal" style="display:none;">
-        <div>
+    <div id="shopModal" style="display:none;" class="modal">
+        <div style="text-align: center;">
             <h2>Obchod</h2>
-            <ul id="shopItems">
-                <!-- Úrovne a tlačidlá na nákup budú pridané dynamicky tu -->
-            </ul>
-            <button onclick="toggleShop()">Zatvoriť Obchod</button>
+            <table id="shopTable">
+                <thead>
+                  <tr>
+                    <th>Level</th>
+                    <th>Cena</th>
+                    <th>Akcia</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <!-- Úrovne a tlačidlá na nákup budú pridané dynamicky tu -->
+                </tbody>
+              </table>
+              <button onclick="toggleShop()" style="margin-top: 10px;">Zatvoriť Obchod</button>
         </div>
     </div>
     <div id="gameControlsModal">
         <button id="closeGameControlsModal" onclick="hideGameControlsModal()"></button>
         <p>tu treba vysvetlit ako funguje hra</p>
     </div>
-    <div id="playerDataSideBar">
+    <!-- Modal pro inventář -->
+<div id="inventoryModal" style="display:none;" class="modal">
+    <div style="text-align: center;">
+        <h2>Inventár</h2>
+  <table id="inventoryTable">
+    <thead>
+      <tr>
+        <th>Druh ryby</th>
+        <th>Cena</th>
+        <th>Akcia</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Položky inventáře budou přidány dynamicky -->
+    </tbody>
+  </table>
+  <button onclick="toggleInventory()" style="margin-top: 10px;">Zatvoriť Inventár</button>
+    </div>
+</div>
+    <!-- <div id="playerDataSideBar">
         <div class="container" id="playerData"></div>
         <br>
         <h4>Inventory</h4>
         <div class="container" id="playerInventory"></div>
-    </div>
+    </div> -->
     <div id="gameArea">
         <!-- <button id="castButton">Udica!</button> -->
         <button id="castButton" class="btn-floating btn-large waves-effect waves-light red"><span class="material-symbols-outlined">
@@ -61,7 +89,14 @@
         <button id="shopButton" class="btn-floating btn-large waves-effect waves-light red" onclick="toggleShop()"><span class="material-symbols-outlined">
             shopping_cart
             </span></button>
-
+            <button id="inventoryButton" class="btn-floating btn-large waves-effect waves-light red" onclick="toggleInventory()"><span class="material-symbols-outlined">
+                inventory_2
+                </span></button>
+                <div id="infoPanel" class="info-panel">
+                    <div>Level: <span id="levelInfo">1</span></div>
+                    <div>Peniaze: <span id="moneyInfo">1000</span> $</div>
+                    <div id="statusInfo">Hra je pozastavena</div>
+                </div>
         <!-- Tu môže byť grafika alebo animácia hodenia udice -->
         <div id="fishingAlert" class="fishing-alert"></div>
         <div id="holdProgressContainer" style="display: none; width: 100%; position: absolute; bottom: 10px; left: 0;">
