@@ -8,9 +8,17 @@ let isGamePaused = false;
 let timerStart = null; // Start time of the fish catch timer
 let remainingCatchTime = null;
 const marker = document.getElementById('fishingMarker');
-let markerX = 507; // Initial X position
-let markerY = 507; // Initial Y position
+let markerX = defaultMarkerPosition(); // Initial X position
+let markerY = defaultMarkerPosition(); // Initial Y position
+const fish = document.getElementById('fish');
+let fishX;
+let fishY;
+const throwButton = document.getElementById('throwButton');
 
+
+function defaultMarkerPosition() {
+    return document.getElementById('gameArea').offsetWidth / 2;
+}
 
 // Načítanie hráčových údajov
 async function getPlayerData() {
@@ -30,6 +38,7 @@ async function loadPlayerData() {
   }
   // displayPlayerData(playerData);
 }
+
 // Aktualizácia hráčových údajov
 async function updatePlayerData(newData) {
   playerData = newData; // Updates data in the playerData variable
@@ -63,71 +72,96 @@ window.onclick = function(event) {
   }
 };
 
+function generateFish() {
+    // Coords for inner square
+    const min = document.getElementById('gameArea').offsetWidth / 3;
+    const max = document.getElementById('gameArea').offsetWidth - min;
+
+    fishX = Math.floor(Math.random() * (max - min + 1)) + min; // Random x-coordinate
+    fishY = Math.floor(Math.random() * (max - min + 1)) + min; // Random y-coordinate
+
+    const fish = document.getElementById('fish');
+    fish.style.left = fishX + 'px';
+    fish.style.top = fishY + 'px';
+    fish.style.display = 'block';
+}
+
+function fishIsInMarker() {
+    return (Math.abs(fishX - markerX) < 20 && Math.abs(fishY - markerY) < 20);
+}
+
 async function catchFish() {
-  clearTimeout(fishCatchTimer); // Stop the timer as fish is caught
-  remainingCatchTime = null; // Reset remaining time
+    clearTimeout(fishCatchTimer); // Stop the timer as fish is caught
+    remainingCatchTime = null; // Reset remaining time
     timerStart = null; // Reset timer start
-  const currentLevel = playerData.level;
-  const levelInfo = levelsData.find(level => level.level === currentLevel);
 
-  if (levelInfo) {
-      const newFish = {
-          species: levelInfo["ryba-druh"],
-          value: levelInfo.cena
-      };
+    if (!fishIsInMarker()) {
+        console.log('Netrafil si rybu');
+        updateStatusInfo('Netrafil si rybu! Hádž znovu.');
+        return;
+    }
+    console.log('Chytil si rybu');
+    updateStatusInfo('Chytil si rybu! Môžeš znovu hádzať.');
+    const currentLevel = playerData.level;
+    const levelInfo = levelsData.find(level => level.level === currentLevel);
 
-      let fishIndex = playerData.inventory.findIndex(fish => fish.species === newFish.species);
-      if (fishIndex !== -1) {
-          playerData.inventory[fishIndex].value += newFish.value;
-      } else {
-          playerData.inventory.push(newFish);
-      }
-      isCastingEnabled = true;
-      await updatePlayerData(playerData);
-  }
+    if (levelInfo) {
+        const newFish = {
+            species: levelInfo["ryba-druh"],
+            value: levelInfo.cena
+        };
+        let fishIndex = playerData.inventory.findIndex(fish => fish.species === newFish.species);
+        if (fishIndex !== -1) {
+            playerData.inventory[fishIndex].value += newFish.value;
+        } else {
+            playerData.inventory.push(newFish);
+        }
+        isCastingEnabled = true;
+        await updatePlayerData(playerData);
+    }
 }
 
 function updateStatusInfo(statusText) {
   document.getElementById('statusInfo').textContent = statusText;
 }
 
-// Zobrazenie hráčových údajov
-function displayPlayerData(data) {
-  // Reset the innerHTML of playerData and playerInventory containers
-  const playerDataContainer = document.getElementById('playerData');
-  const playerInventoryContainer = document.getElementById('playerInventory');
-  playerDataContainer.innerHTML = '';
-  playerInventoryContainer.innerHTML = '';
-
-  // Display all data except for the inventory
-  for (const key in data) {
-    if (key !== 'inventory') {
-      const keyItem = document.createElement('div');
-      keyItem.classList.add('item');
-      keyItem.textContent = `${key}: ${data[key]}`;
-      playerDataContainer.appendChild(keyItem);
-    }
-  }
-
-  // Display inventory items
-  if (Array.isArray(data.inventory)) {
-    data.inventory.forEach(item => {
-      // Creating divs for species and value
-      const speciesItem = document.createElement('div');
-      const valueItem = document.createElement('div');
-      speciesItem.classList.add('item');
-      valueItem.classList.add('item');
-
-      // Assigning text content, ensuring values are strings
-      speciesItem.textContent = `Druh: ${item.species ? item.species.toString() : 'Unknown'}`;
-      valueItem.textContent = `Hodnota: ${item.value ? item.value.toString() : '0'}`;
-
-      // Appending to the playerInventory container
-      playerInventoryContainer.appendChild(speciesItem);
-      playerInventoryContainer.appendChild(valueItem);
-    });
-  }
-}
+// // Zobrazenie hráčových údajov
+// function displayPlayerData(data) {
+//   // Reset the innerHTML of playerData and playerInventory containers
+//   const playerDataContainer = document.getElementById('playerData');
+//   const playerInventoryContainer = document.getElementById('playerInventory');
+//   playerDataContainer.innerHTML = '';
+//   playerInventoryContainer.innerHTML = '';
+//
+//   // Display all data except for the inventory
+//   for (const key in data) {
+//     if (key !== 'inventory') {
+//       const keyItem = document.createElement('div');
+//       keyItem.classList.add('item');
+//       keyItem.textContent = `${key}: ${data[key]}`;
+//       playerDataContainer.appendChild(keyItem);
+//     }
+//   }
+//
+//   // Display inventory items
+//   if (Array.isArray(data.inventory)) {
+//     data.inventory.forEach(item => {
+//       // Creating divs for species and value
+//       const speciesItem = document.createElement('div');
+//       const valueItem = document.createElement('div');
+//       speciesItem.classList.add('item');
+//       valueItem.classList.add('item');
+//
+//       // Assigning text content, ensuring values are strings
+//       speciesItem.textContent = `Druh: ${item.species ? item.species.toString() : 'Unknown'}`;
+//       valueItem.textContent = `Hodnota: ${item.value ? item.value.toString() : '0'}`;
+//
+//       // Appending to the playerInventory container
+//       playerInventoryContainer.appendChild(speciesItem);
+//       playerInventoryContainer.appendChild(valueItem);
+//     });
+//   }
+// }
 
 // Reset hráčových údajov
 async function resetPlayerData() {
@@ -155,15 +189,17 @@ function prepareToCatchFish() {
     console.log("Udica sa hodila!");
     updateStatusInfo("Udica sa hodila!");
     isCastingEnabled = false;
+    generateFish();
 
     // Show the fishing alert
     marker.style.display = 'block';
 
-    catchTime = Math.floor(Math.random() * (30000 - 10000 + 1) + 10000);
+    catchTime = Math.floor(Math.random() * (15000 - 10000 + 1) + 10000);
     timerStart = new Date().getTime(); // Set the start time for the timer
     fishCatchTimer = setTimeout(showCatchButton, catchTime);
   }
 }
+
 function setLevelBackground(levelData) {
     const gameArea = document.getElementById("gameArea");
     if(gameArea && levelData.image) {
@@ -185,16 +221,15 @@ function setLevelBackground(levelData) {
 
 // Pohyb mieritka po obrazovke
 function updateMarkerPosition() {
-    const boundaryMax = 1010; // neresponzivne
+    const boundaryMax = document.getElementById('gameArea').offsetWidth - 15;
 
-
-    if (markerX < 0) markerX = 0;
+    if (markerX < 15) markerX = 15;
     if (markerX > boundaryMax) markerX = boundaryMax;
 
-    if (markerY < 0) markerY = 0;
+    if (markerY < 15) markerY = 15;
     if (markerY > boundaryMax) markerY = boundaryMax;
 
-    console.log(markerX, markerY);
+    // console.log(markerX, markerY);
 
     marker.style.left = markerX + 'px';
     marker.style.top = markerY + 'px';
@@ -205,7 +240,11 @@ document.addEventListener('keydown', handleKeyPress);
 
 function handleKeyPress(event) {
     const step = 10;
-    if ((event.keyCode === 32) && isCastingEnabled) {
+    if ((event.key === " ") && isCastingEnabled) {
+        // Vycentrovanie markeru
+        markerX = defaultMarkerPosition();
+        markerY = defaultMarkerPosition();
+
         // Zobrazit progress bar
         showProgressBar();
         updateProgressBar(0); // Začít na 0%
@@ -227,13 +266,13 @@ function handleKeyPress(event) {
             clearInterval(interval); // Zastavit aktualizace progressbaru
             hideProgressBar(); // Skrýt progres bar
         }, 2000);
-    } else if (event.keyCode === 37) {  // stlacena lava sipka
+    } else if (event.keyCode === 37 && !isCastingEnabled) {  // stlacena lava sipka
         markerX -= step;
-    } else if (event.keyCode === 38) {  // stlacena horna sipka
+    } else if (event.keyCode === 38 && !isCastingEnabled) {  // stlacena horna sipka
         markerY -= step;
-    } else if (event.keyCode === 39) {  // stlacena prava sipka
+    } else if (event.keyCode === 39 && !isCastingEnabled) {  // stlacena prava sipka
         markerX += step;
-    } else if (event.keyCode === 40) {  // stlacena spodna sipka
+    } else if (event.keyCode === 40 && !isCastingEnabled) {  // stlacena spodna sipka
         markerY += step;
     }
 
@@ -241,27 +280,38 @@ function handleKeyPress(event) {
 }
 
 document.addEventListener('keyup', (event) => {
-  if (event.key === "w" || event.key === "W") {
+  if (event.key === " ") {
     clearInterval(keyDownTimer); // Zrušit interval při puštění klávesy
     hideProgressBar(); // Skrýt progress bar
   }
 });
 
-// Gyroskop pre mobily
-window.addEventListener('deviceorientation', (event) => {
-  let beta = event.beta; // Beta je rotácia okolo osi X, ktorá meria náklon hore a dole.
-  if(beta < 45 && isCastingEnabled){ // Displej je naklonený nahor
-    // showCastButton();
-    showCatchButton();
-    isCastingEnabled = false; // Zastaviť detekciu naklonenia kým sa neklikne na tlačidlo
-  }
-});
+// // Gyroskop pre mobily
+// window.addEventListener('deviceorientation', (event) => {
+//   let beta = event.beta; // Beta je rotácia okolo osi X, ktorá meria náklon hore a dole.
+//   if(beta < 45 && isCastingEnabled){ // Displej je naklonený nahor
+//     // showCastButton();
+//     showCatchButton();
+//     isCastingEnabled = false; // Zastaviť detekciu naklonenia kým sa neklikne na tlačidlo
+//   }
+// });
+
+
 function showCastButton() {
   const castButton = document.getElementById("castButton");
   if (castButton) {
     castButton.style.display = "block"; // Zobrazí tlačidlo
   }
 }
+
+function throwRod() {
+    if (isCastingEnabled) {
+        prepareToCatchFish();
+        // Skryte tlačidlo na hodenie prútu
+        throwButton.style.display = 'none';
+    }
+}
+
 function populateShop() {
   const shopTable = document.getElementById('shopTable').getElementsByTagName('tbody')[0];
   shopTable.innerHTML = ''; // Clear existing items
@@ -386,10 +436,12 @@ function showCatchButton() {
 
       // Hide the fishing alert
       marker.style.display = 'none';
+      fish.style.display = 'none';
 
       fishCatchTimer = setTimeout(() => {
         if (!isGamePaused) {
-          castButton.style.display = "none";
+          castButton.style.display = 'none';
+          throwButton.style.display = 'block';
           console.log("Ryba ušla!");
           updateStatusInfo("Ryba ušla!");
           isCastingEnabled = true;
@@ -402,12 +454,16 @@ function showCatchButton() {
     }
   }
 }
+
+
+
 function castLine() {
   const castButton = document.getElementById("castButton");
   if (castButton) {
     castButton.style.display = "none"; // Skryje tlačidlo
   }
   isCastingEnabled = true; // Enable casting again
+  throwButton.style.display = 'block';
 
   // Vygenerovanie náhodného času (v milisekundách) medzi 10 a 30 sekundami
   catchTime = (Math.random() * (30000 - 10000) + 10000).toFixed(0);
@@ -418,8 +474,8 @@ function castLine() {
 }
 
 function pauseGame() {
-  console.log("Hra je zastavena.");
-  updateStatusInfo("Hra je zastavena.");
+  console.log("Hra je zastavená.");
+  updateStatusInfo("Hra je zastavená.");
   if (fishCatchTimer) {
       clearTimeout(fishCatchTimer); // Clears the existing fish catch timer
       // Calculate remaining time for catch if the timer was running
@@ -430,8 +486,8 @@ function pauseGame() {
   isGamePaused = true;
 }
 function resumeGame() {
-  console.log("Hra pokracuje.");
-  updateStatusInfo("Hra pokracuje.");
+  console.log("Hra pokračuje.");
+  updateStatusInfo("Hra pokračuje.");
     if (remainingCatchTime && remainingCatchTime > 0) {
         fishCatchTimer = setTimeout(showCatchButton, remainingCatchTime);
         timerStart = new Date().getTime(); // Reset the start time for the timer
@@ -458,6 +514,14 @@ async function startGame() {
   }
 }
 
+function adjustThrowButtonVisibility() {
+    if (window.innerWidth <= 768) { // Detekcia mobilného zariadenia
+        document.getElementById('throwButton').style.display = 'block';
+    } else {
+        document.getElementById('throwButton').style.display = 'none';
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
   
   const playButton = document.querySelector("#menu button:nth-child(1)"); // Assuming the first button is 'Play'
@@ -482,10 +546,13 @@ async function initGame() {
     console.log(levelsData); // Zobraziť údaje o úrovni
     // displayPlayerData(playerData);
     const castButton = document.getElementById("castButton");
+    throwButton.addEventListener('click', throwRod);
     if (castButton) {
       castButton.addEventListener('click', castLine); // Pridáva udalosť pre kliknutie
       castButton.style.display = "none"; // Skryje tlačidlo na začiatku
     }
+    window.addEventListener('load', adjustThrowButtonVisibility);
+    window.addEventListener('resize', adjustThrowButtonVisibility);
 }
   
 initGame();
