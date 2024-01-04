@@ -7,6 +7,9 @@ let isCastingEnabled = true; // Global variable to manage casting state
 let isGamePaused = false;
 let timerStart = null; // Start time of the fish catch timer
 let remainingCatchTime = null;
+const marker = document.getElementById('fishingMarker');
+let markerX = 507; // Initial X position
+let markerY = 507; // Initial Y position
 
 
 // Načítanie hráčových údajov
@@ -154,7 +157,7 @@ function prepareToCatchFish() {
     isCastingEnabled = false;
 
     // Show the fishing alert
-    document.getElementById('fishingAlert').style.display = 'block';
+    marker.style.display = 'block';
 
     catchTime = Math.floor(Math.random() * (30000 - 10000 + 1) + 10000);
     timerStart = new Date().getTime(); // Set the start time for the timer
@@ -181,10 +184,6 @@ function setLevelBackground(levelData) {
   }
 
 // Pohyb mieritka po obrazovke
-const marker = document.getElementById('marker');
-let markerX = 507; // Initial X position
-let markerY = 507; // Initial Y position
-
 function updateMarkerPosition() {
     const boundaryMax = 1010; // neresponzivne
 
@@ -206,7 +205,7 @@ document.addEventListener('keydown', handleKeyPress);
 
 function handleKeyPress(event) {
     const step = 10;
-    if ((event.key === "w" || event.key === "W") && isCastingEnabled) {
+    if ((event.keyCode === 32) && isCastingEnabled) {
         // Zobrazit progress bar
         showProgressBar();
         updateProgressBar(0); // Začít na 0%
@@ -215,7 +214,7 @@ function handleKeyPress(event) {
         // Aktualizovat progress bar každých 50 milisekund
         let interval = setInterval(() => {
             let elapsedTime = Date.now() - startTime; // Zjistit uplynulý čas
-            let percentage = Math.min((elapsedTime / 5000) * 100, 100); // Vypočítat procento
+            let percentage = Math.min((elapsedTime / 2000) * 100, 100); // Vypočítat procento
             updateProgressBar(percentage); // Aktualizovat progres bar
             if (percentage >= 100) {
                 clearInterval(interval); // Zastavit aktualizace po dosažení 100%
@@ -227,7 +226,7 @@ function handleKeyPress(event) {
             prepareToCatchFish(); // Tato funkce se zavolá po 5 sekundách držení klávesy W
             clearInterval(interval); // Zastavit aktualizace progressbaru
             hideProgressBar(); // Skrýt progres bar
-        }, 5000);
+        }, 2000);
     } else if (event.keyCode === 37) {  // stlacena lava sipka
         markerX -= step;
     } else if (event.keyCode === 38) {  // stlacena horna sipka
@@ -386,7 +385,7 @@ function showCatchButton() {
       castButton.style.display = "block"; // Show the button to catch the fish
 
       // Hide the fishing alert
-      document.getElementById('fishingAlert').style.display = 'none';
+      marker.style.display = 'none';
 
       fishCatchTimer = setTimeout(() => {
         if (!isGamePaused) {

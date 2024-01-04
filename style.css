@@ -159,23 +159,13 @@ tr:hover {
   width: 10rem;
 }
 
-#marker {
-  height: 10px;
-  width: 10px;
-  border-radius: 5px;
-  background: #ff00b7;
-  top: 507px;
-  left: 507px;
-  position: relative;
-}
-
 canvas {
   border: 1px solid black;
   display: block;
   margin: auto;
 }
 
-.fishing-alert {
+.fishing-marker {
   width: 20px;
   height: 20px;
   background-color: red;
