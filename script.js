@@ -59,6 +59,7 @@ window.onclick = function(event) {
     hideGameControlsModal();
   }
 };
+
 async function catchFish() {
   clearTimeout(fishCatchTimer); // Stop the timer as fish is caught
   remainingCatchTime = null; // Reset remaining time
@@ -179,32 +180,66 @@ function setLevelBackground(levelData) {
     document.getElementById('holdProgress').value = percentage;
   }
 
+// Pohyb mieritka po obrazovke
+const marker = document.getElementById('marker');
+let markerX = 507; // Initial X position
+let markerY = 507; // Initial Y position
+
+function updateMarkerPosition() {
+    const boundaryMax = 1010; // neresponzivne
+
+
+    if (markerX < 0) markerX = 0;
+    if (markerX > boundaryMax) markerX = boundaryMax;
+
+    if (markerY < 0) markerY = 0;
+    if (markerY > boundaryMax) markerY = boundaryMax;
+
+    console.log(markerX, markerY);
+
+    marker.style.left = markerX + 'px';
+    marker.style.top = markerY + 'px';
+}
+
 // Klávesový vstup pre počítače
-document.addEventListener('keydown', (event) => {
-  if ((event.key === "w" || event.key === "W") && isCastingEnabled) {
-    // Zobrazit progress bar
-    showProgressBar();
-    updateProgressBar(0); // Začít na 0%
-    let startTime = Date.now(); // Uložit počáteční čas
+document.addEventListener('keydown', handleKeyPress);
 
-    // Aktualizovat progress bar každých 50 milisekund
-    let interval = setInterval(() => {
-      let elapsedTime = Date.now() - startTime; // Zjistit uplynulý čas
-      let percentage = Math.min((elapsedTime / 5000) * 100, 100); // Vypočítat procento
-      updateProgressBar(percentage); // Aktualizovat progres bar
-      if (percentage >= 100) {
-        clearInterval(interval); // Zastavit aktualizace po dosažení 100%
-      }
-    }, 50); // Aktualizovat 20x za sekundu
+function handleKeyPress(event) {
+    const step = 10;
+    if ((event.key === "w" || event.key === "W") && isCastingEnabled) {
+        // Zobrazit progress bar
+        showProgressBar();
+        updateProgressBar(0); // Začít na 0%
+        let startTime = Date.now(); // Uložit počáteční čas
 
-    // Nastavit odpočítávání na 5 sekund pro zavolání funkce prepareToCatchFish
-    keyDownTimer = setTimeout(() => {
-      prepareToCatchFish(); // Tato funkce se zavolá po 5 sekundách držení klávesy W
-      clearInterval(interval); // Zastavit aktualizace progressbaru
-      hideProgressBar(); // Skrýt progres bar
-    }, 5000);
-  }
-});
+        // Aktualizovat progress bar každých 50 milisekund
+        let interval = setInterval(() => {
+            let elapsedTime = Date.now() - startTime; // Zjistit uplynulý čas
+            let percentage = Math.min((elapsedTime / 5000) * 100, 100); // Vypočítat procento
+            updateProgressBar(percentage); // Aktualizovat progres bar
+            if (percentage >= 100) {
+                clearInterval(interval); // Zastavit aktualizace po dosažení 100%
+            }
+        }, 50); // Aktualizovat 20x za sekundu
+
+        // Nastavit odpočítávání na 5 sekund pro zavolání funkce prepareToCatchFish
+        keyDownTimer = setTimeout(() => {
+            prepareToCatchFish(); // Tato funkce se zavolá po 5 sekundách držení klávesy W
+            clearInterval(interval); // Zastavit aktualizace progressbaru
+            hideProgressBar(); // Skrýt progres bar
+        }, 5000);
+    } else if (event.keyCode === 37) {  // stlacena lava sipka
+        markerX -= step;
+    } else if (event.keyCode === 38) {  // stlacena horna sipka
+        markerY -= step;
+    } else if (event.keyCode === 39) {  // stlacena prava sipka
+        markerX += step;
+    } else if (event.keyCode === 40) {  // stlacena spodna sipka
+        markerY += step;
+    }
+
+    updateMarkerPosition();
+}
 
 document.addEventListener('keyup', (event) => {
   if (event.key === "w" || event.key === "W") {
@@ -212,6 +247,7 @@ document.addEventListener('keyup', (event) => {
     hideProgressBar(); // Skrýt progress bar
   }
 });
+
 // Gyroskop pre mobily
 window.addEventListener('deviceorientation', (event) => {
   let beta = event.beta; // Beta je rotácia okolo osi X, ktorá meria náklon hore a dole.
