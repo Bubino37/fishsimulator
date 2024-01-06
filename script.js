@@ -7,8 +7,19 @@ let isCastingEnabled = true; // Global variable to manage casting state
 let isGamePaused = false;
 let timerStart = null; // Start time of the fish catch timer
 let remainingCatchTime = null;
+const marker = document.getElementById('fishingMarker');
+let markerX = defaultMarkerPosition(); // Initial X position
+let markerY = defaultMarkerPosition(); // Initial Y position
+const fish = document.getElementById('fish');
+let fishX;
+let fishY;
+const throwButton = document.getElementById('throwButton');
+let ismobile = false;
 
 
+function defaultMarkerPosition() {
+  return document.getElementById('gameArea').offsetWidth / 2;
+}
 // Načítanie hráčových údajov
 async function getPlayerData() {
   try {
@@ -21,19 +32,52 @@ async function getPlayerData() {
 }
 
 async function loadPlayerData() {
-  playerData = await getPlayerData(); // Load data
-  if (!playerData.purchasedLevels) {
-      playerData.purchasedLevels = []; // Initialize if not present
+  try {
+      const response = await fetch('./data.json');
+      const data = await response.json();
+      playerData = data;
+
+      // Uistite sa, že purchasedLevels je vždy inicializované ako pole
+      if (!playerData.purchasedLevels) {
+          playerData.purchasedLevels = [];
+      }
+  } catch (error) {
+      console.error("Chyba pri načítaní hráčových dát:", error);
   }
-  // displayPlayerData(playerData);
 }
 // Aktualizácia hráčových údajov
 async function updatePlayerData(newData) {
   playerData = newData; // Updates data in the playerData variable
-  // console.log(playerData);
+  
   document.getElementById('levelInfo').textContent = playerData.level;
-    document.getElementById('moneyInfo').textContent = playerData.money;
-  // displayPlayerData(playerData); // Displays updated data
+  document.getElementById('moneyInfo').textContent = playerData.money;
+
+  savePlayerData(); // Uloženie aktualizovaných údajov hráča
+}
+
+// Uloženie hráčových dát do localStorage
+function savePlayerData() {
+  if(playerData) {
+    localStorage.setItem('playerData', JSON.stringify(playerData));
+  }
+}
+
+// Načítanie hráčových dát z localStorage
+function loadSavedPlayerData() {
+  const savedData = localStorage.getItem('playerData');
+  if (savedData) {
+      let parsedData = JSON.parse(savedData);
+      
+      // Kontrola dát (napr. či obsahujú všetky potrebné vlastnosti)
+      if (isValidData(parsedData)) {
+          return parsedData;
+      }
+  }
+  return null; // Alebo vrátiť predvolené hodnoty, ak sú údaje nesprávne
+}
+function isValidData(data) {
+  // Implementujte vlastné kontroly
+  return data && data.purchasedLevels && Array.isArray(data.purchasedLevels);
 }
 
 function showMenu() {
@@ -59,19 +103,51 @@ window.onclick = function(event) {
     hideGameControlsModal();
   }
 };
+
+function generateFish() {
+  // Coords for inner square
+  const min = document.getElementById('gameArea').offsetWidth / 3;
+  const max = document.getElementById('gameArea').offsetWidth - min;
+
+  fishX = Math.floor(Math.random() * (max - min + 1)) + min; // Random x-coordinate
+  fishY = Math.floor(Math.random() * (max - min + 1)) + min; // Random y-coordinate
+
+  const fish = document.getElementById('fish');
+    const levelInfo = levelsData.find(level => level.level === playerData.level);
+    if(levelInfo) {
+        fish.style.backgroundImage = `url('./img/${levelInfo["ryba-druh"]}.png')`;
+        console.log(`url('./img/${levelInfo["ryba-druh"]}.png')`);
+        fish.style.backgroundSize = 'cover'; // Uistite sa, že obrázok pokryje celý div
+        fish.style.width = '30px';
+        fish.style.height = '30px';
+    }
+  fish.style.left = fishX + 'px';
+  fish.style.top = fishY + 'px';
+  fish.style.display = 'block';
+}
+
+function fishIsInMarker() {
+  return (Math.abs(fishX - markerX) < 30 && Math.abs(fishY - markerY) < 30);
+}
 async function catchFish() {
   clearTimeout(fishCatchTimer); // Stop the timer as fish is caught
   remainingCatchTime = null; // Reset remaining time
     timerStart = null; // Reset timer start
+  
+    if (!fishIsInMarker()) {
+      console.log('Netrafil si rybu');
+      updateStatusInfo('Netrafil si rybu! Hádž znovu.');
+      return;
+  }
+  console.log('Chytil si rybu');
+  updateStatusInfo('Chytil si rybu! Môžeš znovu hádzať.');
   const currentLevel = playerData.level;
-  const levelInfo = levelsData.find(level => level.level === currentLevel);
-
-  if (levelInfo) {
-      const newFish = {
-          species: levelInfo["ryba-druh"],
-          value: levelInfo.cena
-      };
-
+  const levelInfo = levelsData.find(level => level.level === playerData.level);
+    if (levelInfo) {
+        const newFish = {
+            species: levelInfo["ryba-druh"],
+            value: levelInfo.cena
+        };
       let fishIndex = playerData.inventory.findIndex(fish => fish.species === newFish.species);
       if (fishIndex !== -1) {
           playerData.inventory[fishIndex].value += newFish.value;
@@ -80,6 +156,10 @@ async function catchFish() {
       }
       isCastingEnabled = true;
       await updatePlayerData(playerData);
+      const fish = document.getElementById('fish');
+        fish.style.backgroundImage = `url('./img/${newFish.species}.png')`;
+        fish.style.width = '30px';
+        fish.style.height = '30px';
   }
 }
 
@@ -87,52 +167,18 @@ function updateStatusInfo(statusText) {
   document.getElementById('statusInfo').textContent = statusText;
 }
 
-// Zobrazenie hráčových údajov
-// function displayPlayerData(data) {
-//   // Reset the innerHTML of playerData and playerInventory containers
-//   const playerDataContainer = document.getElementById('playerData');
-//   const playerInventoryContainer = document.getElementById('playerInventory');
-//   playerDataContainer.innerHTML = '';
-//   playerInventoryContainer.innerHTML = '';
-
-//   // Display all data except for the inventory
-//   for (const key in data) {
-//     if (key !== 'inventory') {
-//       const keyItem = document.createElement('div');
-//       keyItem.classList.add('item');
-//       keyItem.textContent = `${key}: ${data[key]}`;
-//       playerDataContainer.appendChild(keyItem);
-//     }
-//   }
-
-//   // Display inventory items
-//   if (Array.isArray(data.inventory)) {
-//     data.inventory.forEach(item => {
-//       // Creating divs for species and value
-//       const speciesItem = document.createElement('div');
-//       const valueItem = document.createElement('div');
-//       speciesItem.classList.add('item');
-//       valueItem.classList.add('item');
-
-//       // Assigning text content, ensuring values are strings
-//       speciesItem.textContent = `Druh: ${item.species ? item.species.toString() : 'Unknown'}`;
-//       valueItem.textContent = `Hodnota: ${item.value ? item.value.toString() : '0'}`;
-
-//       // Appending to the playerInventory container
-//       playerInventoryContainer.appendChild(speciesItem);
-//       playerInventoryContainer.appendChild(valueItem);
-//     });
-//   }
-// }
-
 // Reset hráčových údajov
 async function resetPlayerData() {
-  const defaultData = {
-    "money": 1000,
-    "inventory": [],
-    "level": 1
-  };
-  await updatePlayerData(defaultData);
+  localStorage.removeItem('playerData'); // Odstránenie údajov o hráčovi
+  console.log(localStorage);
+  try {
+      // Fetch initial player data from the database or file
+      const initialData = await getPlayerData();
+      await updatePlayerData(initialData);
+      console.log("Player data has been reset to initial values.");
+  } catch (error) {
+      console.error("Error resetting player data:", error);
+  }
 }
 // Načítanie údajov o úrovni
 async function loadLevelsData() {
@@ -151,9 +197,10 @@ function prepareToCatchFish() {
     console.log("Udica sa hodila!");
     updateStatusInfo("Udica sa hodila!");
     isCastingEnabled = false;
+    generateFish();
 
     // Show the fishing alert
-    document.getElementById('fishingMarker').style.display = 'block';
+    marker.style.display = 'block';
 
     catchTime = Math.floor(Math.random() * (30000 - 10000 + 1) + 10000);
     timerStart = new Date().getTime(); // Set the start time for the timer
@@ -179,23 +226,23 @@ function setLevelBackground(levelData) {
     document.getElementById('holdProgress').value = percentage;
   }
 
-// Pohyb mieritka po obrazovke
-const marker = document.getElementById('fishingMarker');
-let markerX = 507; // Initial X position
-let markerY = 507; // Initial Y position
+// // Pohyb mieritka po obrazovke
+// const marker = document.getElementById('fishingMarker');
+// let markerX = 507; // Initial X position
+// let markerY = 507; // Initial Y position
 
 function updateMarkerPosition() {
-    const boundaryMax = 1010; // neresponzivne
+  const boundaryMax = document.getElementById('gameArea').offsetWidth - 15;
 
 
-    if (markerX < 0) markerX = 0;
+    if (markerX < 15) markerX = 15;
     if (markerX > boundaryMax) markerX = boundaryMax;
 
-    if (markerY < 0) markerY = 0;
+    if (markerY < 15) markerY = 15;
     if (markerY > boundaryMax) markerY = boundaryMax;
-    if (isCastingEnabled) {
-      console.log(markerX, markerY);
-    }
+    // if (isCastingEnabled) {
+    //   console.log(markerX, markerY);
+    // }
     
 
     marker.style.left = markerX + 'px';
@@ -209,9 +256,12 @@ document.addEventListener('keydown', handleKeyPress);
 function handleKeyPress(event) {
     const step = 10;
     if (event.key === " " && isCastingEnabled) {
+      // Vycentrovanie markeru
+      markerX = defaultMarkerPosition();
+      markerY = defaultMarkerPosition();
         // Zobrazit progress bar
         showProgressBar();
-        updateProgressBar(0); // Začít na 0%
+        // updateProgressBar(0); // Začít na 0%
         let startTime = Date.now(); // Uložit počáteční čas
 
         // Aktualizovat progress bar každých 50 milisekund
@@ -230,17 +280,58 @@ function handleKeyPress(event) {
             clearInterval(interval); // Zastavit aktualizace progressbaru
             hideProgressBar(); // Skrýt progres bar
         }, 5000);
-    } else if (event.keyCode === 37) {  // stlacena lava sipka
+    } else if (event.keyCode === 37 && !isCastingEnabled) {  // stlacena lava sipka
         markerX -= step;
-    } else if (event.keyCode === 38) {  // stlacena horna sipka
+    } else if (event.keyCode === 38 && !isCastingEnabled) {  // stlacena horna sipka
         markerY -= step;
-    } else if (event.keyCode === 39) {  // stlacena prava sipka
+    } else if (event.keyCode === 39 && !isCastingEnabled) {  // stlacena prava sipka
         markerX += step;
-    } else if (event.keyCode === 40) {  // stlacena spodna sipka
+    } else if (event.keyCode === 40 && !isCastingEnabled) {  // stlacena spodna sipka
         markerY += step;
     }
 
     updateMarkerPosition();
+}
+
+function handleOrientation(event) {
+  const gameArea = document.getElementById("gameArea");
+  const marker = document.getElementById("fishingMarker");
+
+  // Rozmery gameArea
+  const maxX = gameArea.clientWidth - marker.clientWidth;
+  const maxY = gameArea.clientHeight - marker.clientHeight;
+
+  // Vypočet uhlov
+  let x = event.beta;  // V ose X: hodnota medzi -180 a 180
+  let y = event.gamma; // V ose Y: hodnota medzi -90 a 90
+
+  // Konverzia hodnôt na percentuálne rozmedzie pre hernú oblasť
+  let percentX = (y + 90) / 180; // od 0 do 1
+  let percentY = (x + 90) / 180; // od 0 do 1
+
+  // Výpočet novej pozície markeru
+  let posX = percentX * maxX;
+  let posY = percentY * maxY;
+
+  // Aplikácia ohraničenia pre marker
+  posX = Math.max(15, Math.min(maxX - 15, posX));
+  posY = Math.max(15, Math.min(maxY - 15, posY));
+
+  // Aktualizácia polohy markeru
+  marker.style.left = posX + 'px';
+  marker.style.top = posY + 'px';
+
+  markerX = posX;
+  markerY = posY;
+
+  // Debugovanie: vypíšte hodnoty pre porovnanie
+  console.log(`Marker X: ${posX}, Marker Y: ${posY}`);
+  console.log(`Fish X: ${fishX}, Fish Y: ${fishY}`);
+}
+
+// Pridanie počúvača udalostí pre zmenu orientácie
+if (window.DeviceOrientationEvent) {
+  window.addEventListener("deviceorientation", handleOrientation, true);
 }
 
 document.addEventListener('keyup', (event) => {
@@ -269,50 +360,36 @@ function throwRod() {
   if (isCastingEnabled) {
       prepareToCatchFish();
       // Skryte tlačidlo na hodenie prútu
-      document.getElementById('throwButton').style.display = 'none';
+      throwButton.style.display = 'none';
   }
 }
-
-// function showCatchButton() {
-//   const castButton = document.getElementById("castButton");
-//   const throwButton = document.getElementById("throwButton");
-
-//   if (!isGamePaused) {
-//       castButton.style.display = "block"; // Zobrazí tlačidlo na chytanie ryby
-//       throwButton.style.display = 'none'; // Skryje tlačidlo na hodenie prútu
-
-//       fishCatchTimer = setTimeout(() => {
-//           if (!isGamePaused) {
-//               castButton.style.display = "none"; // Skryje tlačidlo na chytanie ryby
-//               isCastingEnabled = true;
-
-//               // Zobrazí tlačidlo na hodenie prútu pre mobilné zariadenia
-//               throwButton.style.display = 'block';
-//           }
-//       }, 3000);
-//   }
-// }
 
 function populateShop() {
   const shopTable = document.getElementById('shopTable').getElementsByTagName('tbody')[0];
   shopTable.innerHTML = ''; // Clear existing items
 
   levelsData.forEach(level => {
-    let row = shopTable.insertRow();
-    let levelCell = row.insertCell(0);
-    let priceCell = row.insertCell(1);
-    let actionCell = row.insertCell(2);
+      let row = shopTable.insertRow();
+      let levelCell = row.insertCell(0);
+      let priceCell = row.insertCell(1);
+      let actionCell = row.insertCell(2);
 
-    levelCell.textContent = level.info;
-    priceCell.textContent = level.requiredExperience + " $";
+      levelCell.textContent = level.info;
+      priceCell.textContent = level.requiredExperience + " $";
 
-    let actionButton = document.createElement('button');
-    actionButton.textContent = playerData.purchasedLevels.includes(level.level) ? 'Prepnúť' : 'Kúpiť';
-    actionButton.disabled = playerData.level === level.level;
-    actionButton.onclick = playerData.purchasedLevels.includes(level.level) ? 
-                            () => switchLevel(level) : 
-                            () => buyLevel(level);
-    actionCell.appendChild(actionButton);
+      let actionButton = document.createElement('button');
+      console.log(levelsData);
+      actionButton.textContent = playerData.purchasedLevels.includes(level.level) ? 'Prepnúť' : 'Kúpiť';
+      actionButton.classList.add("waves-effect", "waves-light", "btn-small");
+      actionButton.disabled = playerData.level === level.level;
+      actionButton.onclick = () => {
+          if (playerData.purchasedLevels.includes(level.level)) {
+              switchLevel(level);
+          } else {
+              buyLevel(level);
+          }
+      };
+      actionCell.appendChild(actionButton);
   });
 }
 function buyLevel(level) {
@@ -396,6 +473,9 @@ function populateInventory() {
 
     let sellButton = document.createElement('button');
     sellButton.textContent = 'Predať';
+    sellButton.classList.add("waves-effect");
+    sellButton.classList.add("waves-light");
+    sellButton.classList.add("btn-small");
     sellButton.onclick = () => sellItem(index);
     actionCell.appendChild(sellButton);
   });
@@ -417,14 +497,19 @@ function showCatchButton() {
       castButton.style.display = "block"; // Show the button to catch the fish
 
       // Hide the fishing alert
-      document.getElementById('fishingMarker').style.display = 'none';
+      marker.style.display = 'none';
+      fish.style.display = 'none';
 
       fishCatchTimer = setTimeout(() => {
         if (!isGamePaused) {
           castButton.style.display = "none";
+          if (ismobile) {
+            throwButton.style.display = 'block';
+          }
+          
           console.log("Ryba ušla!");
           updateStatusInfo("Ryba ušla!");
-          throwButton.style.display = 'block';
+          // throwButton.style.display = 'block';
           isCastingEnabled = true;
 
           // Reset the timer and alert states
@@ -442,7 +527,10 @@ function castLine() {
     castButton.style.display = "none"; // Skryje tlačidlo
   }
   isCastingEnabled = true; // Enable casting again
-  throwButton.style.display = 'block';
+  if(ismobile){
+    throwButton.style.display = 'block';
+  }
+  
 
   // Vygenerovanie náhodného času (v milisekundách) medzi 10 a 30 sekundami
   catchTime = (Math.random() * (30000 - 10000) + 10000).toFixed(0);
@@ -453,8 +541,8 @@ function castLine() {
 }
 
 function pauseGame() {
-  console.log("Hra je zastavena.");
-  updateStatusInfo("Hra je zastavena.");
+  console.log("Hra je zastavená.");
+  updateStatusInfo("Hra je zastavená.");
   if (fishCatchTimer) {
       clearTimeout(fishCatchTimer); // Clears the existing fish catch timer
       // Calculate remaining time for catch if the timer was running
@@ -465,8 +553,8 @@ function pauseGame() {
   isGamePaused = true;
 }
 function resumeGame() {
-  console.log("Hra pokracuje.");
-  updateStatusInfo("Hra pokracuje.");
+  console.log("Hra pokračuje.");
+  updateStatusInfo("Hra pokračuje.");
     if (remainingCatchTime && remainingCatchTime > 0) {
         fishCatchTimer = setTimeout(showCatchButton, remainingCatchTime);
         timerStart = new Date().getTime(); // Reset the start time for the timer
@@ -495,9 +583,11 @@ async function startGame() {
 
 function adjustThrowButtonVisibility() {
   if (window.innerWidth <= 768) { // Detekcia mobilného zariadenia
-      document.getElementById('throwButton').style.display = 'block';
+      throwButton.style.display = 'block';
+      ismobile = true;
   } else {
-      document.getElementById('throwButton').style.display = 'none';
+      throwButton.style.display = 'none';
+      ismobile = false;
   }
 }
 
@@ -514,15 +604,38 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 async function initGame() {
   await loadLevelsData();
-  await loadPlayerData(); // This function will load data and store it in playerData
-  updatePlayerData(playerData);
+  
+  // Skúsi načítať dáta hráča z localStorage, ak sú dostupné
+  const savedPlayerData = loadSavedPlayerData();
+  if(savedPlayerData) {
+    playerData = savedPlayerData;
+  } else {
+    await loadPlayerData(); // Načítanie nových dát hráča, ak nie sú žiadne uložené
+  }
+  adjustThrowButtonVisibility();
+
+  // Vygeneruj náhodný level od 1 do 5
+  const randomLevel = Math.floor(Math.random() * 5) + 1;  // Náhodné číslo medzi 1 a 5
+
+  // Nastav náhodný level pre hráča, ale iba ak úroveň existuje v dátach úrovne
+  if(levelsData.some(level => level.level === randomLevel)) {
+    playerData.level = randomLevel;
+  }
+
+  updatePlayerData(playerData); // Aktualizuj údaje hráča s novým levelom
   showMenu(); // Shows menu at the start
-    const levelInfo = levelsData.find(level => level.level === playerData.level);
-    if(levelInfo) {
-      setLevelBackground(levelInfo);
-    }
-    console.log(playerData);
-    console.log(levelsData); // Zobraziť údaje o úrovni
+
+  // Získaj informácie o úrovni pre aktuálne nastavený level a nastav pozadie
+  const levelInfo = levelsData.find(level => level.level === playerData.level);
+  if(levelInfo) {
+    setLevelBackground(levelInfo);
+  } else {
+    console.error("No level information found for the current level.");
+    // Optionally, handle the error case, such as setting a default background or notifying the user.
+  }
+
+  console.log(playerData);
+  console.log(levelsData); // Zobraziť údaje o úrovni
     // displayPlayerData(playerData);
     const castButton = document.getElementById("castButton");
     document.getElementById('throwButton').addEventListener('click', throwRod);
@@ -532,6 +645,10 @@ async function initGame() {
     }
     window.addEventListener('load', adjustThrowButtonVisibility);
 window.addEventListener('resize', adjustThrowButtonVisibility);
+// document.getElementById('resetButton').addEventListener('click', resetPlayerData);
+if (window.DeviceOrientationEvent) {
+  window.addEventListener("deviceorientation", handleOrientation, true);
+}
 }
   
 initGame();

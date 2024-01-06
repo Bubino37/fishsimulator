@@ -10,10 +10,10 @@ html {
 }
 
 #gameArea {
-  max-width: 1024px;
-  max-height: 1024px;
-  width: 90vw; /* Šírka je 90% z šírky viewportu */
-  height: 90vw; /* Výška je 90% z šírky viewportu */
+  max-width: 750px;
+  max-height: 750px;
+  /* width: 90vw;  Šírka je 90% z šírky viewportu */ 
+  /* height: 90vw;  Výška je 90% z šírky viewportu */
   aspect-ratio: 1 / 1; /* Udržuje štvorcový pomer strán */
   box-sizing: border-box; /* Uistite sa, že hranice a padding sú zahrnuté v šírke/výške */
   display: flex;
@@ -145,8 +145,8 @@ tr:hover {
 #gameControlsModal {
   display: none;
   position: fixed;
-  width: 50%;
-  height: 80%;
+  width: 70%;
+  height: 90%;
   background-color: rgba(255, 255, 255);
   z-index: 1001;
   justify-content: center;
@@ -154,11 +154,11 @@ tr:hover {
   padding: 0.5rem;
 }
 
-#closeGameControlsModal {
+/* #closeGameControlsModal {
   height: 1rem;
   width: 1rem;
   background: red;
-}
+} */
 
 #playerDataSideBar {
   width: 10rem;
@@ -180,6 +180,17 @@ canvas {
   transform: translate(-50%, -50%);
   display: none;
   animation: pulse 2s infinite;
+}
+
+#fish {
+  width: 10px;
+  height: 10px;
+  /* background-color: #8a2d2d; */
+  /* border-radius: 50%; */
+  position: absolute;
+  /* transform: translate(-50%, -50%); */
+  display: none;
+  /* animation: pulse 1s infinite; */
 }
 
 @keyframes pulse {
@@ -219,7 +230,7 @@ canvas {
 }
 
 /* Štýly pre mobilné zariadenia */
-@media screen and (max-width: 599px) {
+@media screen and (max-height: 599px) {
   .btn-throw {
       position: absolute;
       right: 10px;
@@ -228,7 +239,7 @@ canvas {
   }
 }
 
-@media (max-width: 1024px) {
+@media (max-height: 1024px) {
   #gameArea {
     width: 90vw; /* Alebo iný percentuálny podiel, prípadne vhodnú veľkosť */
     height: 90vw; /* Udržuje štvorcový pomer strán */
@@ -240,7 +251,7 @@ canvas {
   }
 }
 
-@media (min-width: 1025px) {
+@media (min-height: 1025px) {
   #gameArea {
     width: 1024px; /* Pevná šírka 1024px */
     height: 1024px; /* Pevná výška 1024px */
